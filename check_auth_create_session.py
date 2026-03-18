@@ -5,7 +5,6 @@ class BasicAuthentication():
         try:
             response = requests.get(url)
             if response.status_code == 401:
-                # Sửa lỗi chính tả 'reponse' thành 'response' từ ảnh gốc
                 basic_auth = response.headers.get("WWW-Authenticate", "")
                 if "Basic" in basic_auth:
                     return True
