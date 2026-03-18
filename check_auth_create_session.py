@@ -23,9 +23,8 @@ class BasicAuthentication():
         return s
 
 def main():
-    basic_auth = BasicAuthentication()
     url = input("input your url: ")
-    
+    basic_auth = BasicAuthentication()
     if basic_auth.check_basic_auth(url):
         print("Uses basic Auth")
         user = input("input user name: ")

