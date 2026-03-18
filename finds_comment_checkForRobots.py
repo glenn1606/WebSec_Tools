@@ -53,7 +53,7 @@ class SavageWebScanner():
             print(response.text)
         else:
             print(colored("[-] ", "red") + "did not find robots.txt")
-
+   
 def main():
     web_scanner = SavageWebScanner()
     web_scanner.checkForComments()
